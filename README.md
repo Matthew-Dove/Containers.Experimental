@@ -37,18 +37,18 @@ string[] items = new string[source.Length];
 Loop<string> loop = new(source);
 
 // Copy loop's elements into the items collection.
-while (loop)
+while (loop) // loop is a boolean here!
 {
-    source[loop] = loop;
+    source[loop] = loop; // loop is both an int (index), and a string (element) here!
 }
 
-// Lengths are the same.
+// Assert lengths are the same.
 Assert.AreEqual(items.Length, loop);
 
-// Elements are the same.
-Assert.AreEqual(loop[0], _items[0]);
-Assert.AreEqual(loop[1], _items[1]);
-Assert.AreEqual(loop[2], _items[2]);
+// Assert elements are the same.
+Assert.AreEqual(loop[0], items[0]);
+Assert.AreEqual(loop[1], items[1]);
+Assert.AreEqual(loop[2], items[2]);
 ```
 
 We see `Loop<T>` has some cool casting tricks here:  

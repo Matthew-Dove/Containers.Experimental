@@ -7,31 +7,6 @@
 
         private Loop<string> _loop;
 
-
-
-        [TestMethod]
-        public void WhileLoop222()
-        {
-            string[] source = new[] { "1", "2", "3" };
-
-            string[] items = new string[source.Length];
-            Loop<string> loop = new(source);
-
-            // Copy loop's elements into the items collection.
-            while (loop)
-            {
-                source[loop] = loop;
-            }
-
-            // Lengths are the same.
-            Assert.AreEqual(items.Length, loop);
-
-            // Elements are the same.
-            Assert.AreEqual(loop[0], _items[0]);
-            Assert.AreEqual(loop[1], _items[1]);
-            Assert.AreEqual(loop[2], _items[2]);
-        }
-
         [TestInitialize]
         public void Initialize()
         {

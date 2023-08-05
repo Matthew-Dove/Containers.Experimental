@@ -90,7 +90,64 @@ static Response<int> Sum(int[] numbers)
 ```
 
 `Match<T>` was abandoned due to C# adding native pattern matching to the language, that is much more powerful, and ever expanding in it's capability.  
-Truth be told, I never once found a good use for it in my production code either; and it's a bit verbose to write out.  
+Truth be told, I never found a good use for it in my production code either; and it's a bit verbose to write out.  
+
+## ResponseValueTask`<T>`
+
+A helper type for the `Response` custom awaiters.  
+`ResponseValueTask<T>` serves as a bridge between `Task<T>` / `ValueTask<T>`, and `Response<T>`.  
+The core difference between `ResponseValueTask<T>`, and `Response<T>`; is `ResponseValueTask<T>` is constrained to be a `ValueTask<T>`.  
+This allows us to cast easily from some `Task<T>`, to `ResponseValueTask<T>`, and then down to `Response<T>`.  
+For example:
+
+```cs
+// Function to call.
+static async Task<int> Divide(int numerator, int denominator)
+{
+    var quotient = numerator / denominator;
+    await Task.Delay(1);
+    return quotient;
+}
+
+// Calling code.
+ResponseValueTask<int> successResponse = Divide(1, 1); 
+Response<int> success = await successResponse; // Response<int> success = Divide(1, 1); is not possible to cast; so we use ResponseValueTask<int>.
+
+ResponseValueTask<int> errorResponse = Divide(1, 0); // This would normally be a runtime exception.
+Response<int> error = await errorResponse;
+
+Assert.IsTrue(success);
+Assert.AreEqual(1, success);
+Assert.IsFalse(error);
+```
+
+Writing out the types on seperate lines is not necessary (*i.e.*):
+
+```cs
+Response<int> success = await new ResponseValueTask<int>(Divide(1, 1)); // OK.
+Response<int> error = await new ResponseValueTask<int>(Divide(1, 0)); // Fail (but no runtime exception).
+
+Assert.IsTrue(success);
+Assert.AreEqual(1, success);
+Assert.IsFalse(error);
+```
+
+It's fine to use `var` too, as it's the awaiter that determines the type:
+
+```cs
+// No need to wrap Task<T> types in try catches anymore!
+var success = await new ResponseValueTask<int>(Divide(1, 1));
+var error = await new ResponseValueTask<int>(Divide(1, 0));
+```
+
+## ResponseTask`<T>`
+
+`ResponseTask<T>`, has all the properties of `ResponseValueTask<T>` - except it only works with `Task`, not `ValueTask`, or some pre-calculated value of `T`.  
+This is the one you should be using 90% of the time, as `ResponseValueTask<T>` is only better in specific scenarios (*for all the same reasons as .net's `ValueTask`*).  
+
+`ResponseValueTask<T>`, and `ResponseTask<T>` where abandoned due to the more generic type: `ResponseAsync<T>`.  
+These types provided a safe conversion from `Task<T>`, or `ValueTask<T>` into `Response<T>`.  
+The conversions are also handled by `ResponseAsync<T>`'s extension methods i.e. `AsResponse()`, making these types redundant.  
 
 # Credits
 

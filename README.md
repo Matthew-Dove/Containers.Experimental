@@ -60,7 +60,39 @@ We see `Loop<T>` has some cool casting tricks here:
 `Loop<T>` is faster than using standard array indexers.  
 `Loop<T>` will be quickly be made redundant, as improvements come to the common types we use everyday in the BCL; hence it being moved here.  
 
+## Match`<T>`
+
+Let's say you'd like to do different things based on the state of some input.  
+For example summing an array of integers, you have three states, the array is null, the array is empty, the array has more then zero elements.  
+You can have a pattern for each state (or a subset of the states), and have different behaviour for each pattern.  
+
+In the example below when the input is null, we return an invalid response, when the input has no elements, we return 0, otherwise we return the sum of the array's elements.
+
+```cs
+var input = new int[] { 1, 2, 3 };
+
+var result = Expression.Match(input,
+    Pattern.Create<int[], int>(x => x == null, _ => Response.Create<int>()), // When null, return an invalid response.
+    Pattern.Create<int[], int>(x => x.Length == 0, _ => Response.Create(0)), // When empty, return 0.
+    Pattern.Create<int[], int>(x => x.Length > 0, Sum) // When more than zero elements exist, sum them, and return that result.
+);
+
+// Sum all elements in the array.
+static Response<int> Sum(int[] numbers)
+{
+	var count = 0;
+	for (int i = 0; i < numbers.Length; i++)
+	{
+		count += numbers[i];
+	}
+	return Response.Create(count);
+}
+```
+
+`Match<T>` was abandoned due to C# adding native pattern matching to the language, that is much more powerful, and ever expanding in it's capability.  
+Truth be told, I never once found a good use for it in my production code either; and it's a bit verbose to write out.  
+
 # Credits
 
-Special thanks to the following:  
+Thanks to the following:  
 * [Girl with red hat](https://unsplash.com/@girlwithredhat) from unsplash for the [banner image](https://unsplash.com/photos/6TKVyi11oCM).
